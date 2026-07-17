@@ -1,0 +1,371 @@
+{
+  "id": "gaussiangpt",
+  "kind": "model",
+  "type": "model",
+  "name": "GaussianGPT",
+  "displayName": "GaussianGPT",
+  "version": "0.1.0",
+  "description": "Unconditional autoregressive 3D Gaussian scene generation using locally vendored GaussianGPT source and node-owned official checkpoint pairs.",
+  "source": "https://github.com/DrHepa/modly-gaussiangpt-extension",
+  "author": "DrHepa",
+  "license": {
+    "wrapper": "MIT",
+    "upstream_code": "MIT",
+    "weights": "Unknown; the official checkpoint host does not declare checkpoint license terms"
+  },
+  "generator_class": "GaussianGPTGenerator",
+  "tags": [
+    "unconditional-3d",
+    "gaussian-splatting",
+    "autoregressive",
+    "point-cloud-preview",
+    "glb"
+  ],
+  "inputs": [],
+  "outputs": [
+    {
+      "id": "mesh",
+      "type": "mesh",
+      "formats": [
+        "glb"
+      ],
+      "pbr": false,
+      "label": "GLB point-cloud compatibility preview",
+      "sidecars": [
+        {
+          "format": "pt",
+          "role": "canonical GaussianGPT tensor payload"
+        },
+        {
+          "format": "ply",
+          "role": "INRIA-style Gaussian splat payload"
+        },
+        {
+          "format": "gif",
+          "role": "optional centered orbit preview"
+        },
+        {
+          "format": "json",
+          "role": "run metadata"
+        }
+      ]
+    }
+  ],
+  "asset_requirements_contract": {
+    "operational_download_plan": "nodes[].https_downloads",
+    "asset_requirements_role": "documentation-and-readiness-metadata-only",
+    "files_land_directly_in_node_model_dir": true
+  },
+  "asset_requirements": [
+    {
+      "id": "vfront-vqvae",
+      "type": "https_file",
+      "url": "https://kaldir.vc.cit.tum.de/gaussiangpt/vqvae_vfront.ckpt",
+      "filename": "vqvae_vfront.ckpt",
+      "owner_id": "generate-vfront",
+      "target": "models/gaussiangpt/generate-vfront/vqvae_vfront.ckpt",
+      "size_bytes": 2115020643,
+      "sha256": "9f70d0939dc791292be52da6c503bf51b3ac73d9905b51784d0aac81e44faf7a",
+      "required": true,
+      "managed_by": "modly-ui",
+      "operational_plan": "nodes[generate-vfront].https_downloads",
+      "license": "Unknown"
+    },
+    {
+      "id": "vfront-gpt",
+      "type": "https_file",
+      "url": "https://kaldir.vc.cit.tum.de/gaussiangpt/gpt_vfront.ckpt",
+      "filename": "gpt_vfront.ckpt",
+      "owner_id": "generate-vfront",
+      "target": "models/gaussiangpt/generate-vfront/gpt_vfront.ckpt",
+      "size_bytes": 3421157765,
+      "sha256": "203dc730495bf4f21e60280c6152703867f1b81e9c035d110d792e6a87d9313b",
+      "required": true,
+      "managed_by": "modly-ui",
+      "operational_plan": "nodes[generate-vfront].https_downloads",
+      "license": "Unknown"
+    },
+    {
+      "id": "both-vqvae",
+      "type": "https_file",
+      "url": "https://kaldir.vc.cit.tum.de/gaussiangpt/vqvae_both.ckpt",
+      "filename": "vqvae_both.ckpt",
+      "owner_id": "generate-both",
+      "target": "models/gaussiangpt/generate-both/vqvae_both.ckpt",
+      "size_bytes": 2115018167,
+      "sha256": "a780ed2920e877736699bb3da84a43362c1a565adff91217841d4b95cb784542",
+      "required": true,
+      "managed_by": "modly-ui",
+      "operational_plan": "nodes[generate-both].https_downloads",
+      "license": "Unknown"
+    },
+    {
+      "id": "both-gpt",
+      "type": "https_file",
+      "url": "https://kaldir.vc.cit.tum.de/gaussiangpt/gpt_both.ckpt",
+      "filename": "gpt_both.ckpt",
+      "owner_id": "generate-both",
+      "target": "models/gaussiangpt/generate-both/gpt_both.ckpt",
+      "size_bytes": 3421156679,
+      "sha256": "054978e811716292472dd501cc05b54c39789af6dd8730aab86061545c8f0a8b",
+      "required": true,
+      "managed_by": "modly-ui",
+      "operational_plan": "nodes[generate-both].https_downloads",
+      "license": "Unknown"
+    }
+  ],
+  "setup": {
+    "classification": "dependency-only-fail-closed-setup",
+    "downloads_weights": false,
+    "downloads_upstream_source": false,
+    "default_downloads": false,
+    "argv_contract": {
+      "modly": "setup.py '{\"python_exe\":\"...\",\"ext_dir\":\"...\",\"gpu_sm\":100,\"cuda_version\":128}'"
+    },
+    "environment_status": "cp311-aarch64-cu128-cu130-experimental-probe-required",
+    "evidence": {
+      "status_path": ".modly/setup/setup-status.json",
+      "log_path": ".modly/setup/logs/setup.log"
+    }
+  },
+  "docs": {
+    "readme": "./README.md",
+    "environment_probe": "./docs/environment-probe.md",
+    "third_party_notices": "./THIRD_PARTY_NOTICES.md",
+    "upstream_metadata": "./UPSTREAM.json"
+  },
+  "nodes": [
+    {
+      "id": "generate-vfront",
+      "type": "model.generate",
+      "name": "GaussianGPT 3D-FRONT",
+      "displayName": "GaussianGPT 3D-FRONT",
+      "permanent": true,
+      "capability_id": "unconditional-gaussian-scene-generation",
+      "description": "Generate one unconditional Gaussian scene using the official 3D-FRONT VQ-VAE/GPT pair. Returns a deterministic GLB point-cloud compatibility preview; canonical Gaussian fidelity remains in the PT and INRIA PLY sidecars.",
+      "input": "none",
+      "output": "mesh",
+      "output_formats": [
+        "glb"
+      ],
+      "sidecar_formats": [
+        "pt",
+        "ply",
+        "gif",
+        "json"
+      ],
+      "pbr": false,
+      "num_samples": 1,
+      "fixed_params": {
+        "num_samples": 1
+      },
+      "weight_owner_id": "generate-vfront",
+      "download_check": ".modly/https-assets-ready.json",
+      "https_downloads": [
+        {
+          "url": "https://kaldir.vc.cit.tum.de/gaussiangpt/vqvae_vfront.ckpt",
+          "filename": "vqvae_vfront.ckpt",
+          "size_bytes": 2115020643,
+          "sha256": "9f70d0939dc791292be52da6c503bf51b3ac73d9905b51784d0aac81e44faf7a"
+        },
+        {
+          "url": "https://kaldir.vc.cit.tum.de/gaussiangpt/gpt_vfront.ckpt",
+          "filename": "gpt_vfront.ckpt",
+          "size_bytes": 3421157765,
+          "sha256": "203dc730495bf4f21e60280c6152703867f1b81e9c035d110d792e6a87d9313b"
+        }
+      ],
+      "params_schema": [
+        {
+          "id": "temperature",
+          "label": "Temperature",
+          "type": "float",
+          "default": 0.9,
+          "min": 0.0,
+          "max": 2.0,
+          "step": 0.05,
+          "tooltip": "Autoregressive sampling temperature. Higher values increase diversity and instability."
+        },
+        {
+          "id": "top_p",
+          "label": "Top P",
+          "type": "float",
+          "default": 0.9,
+          "min": 0.01,
+          "max": 1.0,
+          "step": 0.01,
+          "tooltip": "Nucleus-sampling probability threshold."
+        },
+        {
+          "id": "top_k",
+          "label": "Top K",
+          "type": "int",
+          "default": 0,
+          "min": 0,
+          "step": 1,
+          "tooltip": "Limit sampling to the K most likely tokens. Zero disables top-k filtering."
+        },
+        {
+          "id": "seed",
+          "label": "Seed",
+          "type": "int",
+          "default": 0,
+          "min": 0,
+          "max": 2147483646,
+          "step": 1,
+          "tooltip": "Deterministic sampling seed."
+        },
+        {
+          "id": "background_color",
+          "label": "Preview Background",
+          "type": "select",
+          "default": "white",
+          "options": [
+            {
+              "value": "white",
+              "label": "White"
+            },
+            {
+              "value": "black",
+              "label": "Black"
+            }
+          ],
+          "tooltip": "Background used only for the optional orbit preview."
+        },
+        {
+          "id": "render_preview",
+          "label": "Render Orbit Preview",
+          "type": "select",
+          "default": "true",
+          "options": [
+            {
+              "value": "true",
+              "label": "Render"
+            },
+            {
+              "value": "false",
+              "label": "Skip"
+            }
+          ],
+          "tooltip": "Render an optional Gaussian orbit GIF after sampling. This section is not interruptible until the upstream renderer returns."
+        }
+      ]
+    },
+    {
+      "id": "generate-both",
+      "type": "model.generate",
+      "name": "GaussianGPT 3D-FRONT + ASE",
+      "displayName": "GaussianGPT 3D-FRONT + ASE",
+      "permanent": true,
+      "capability_id": "unconditional-gaussian-scene-generation",
+      "description": "Generate one unconditional Gaussian scene using the official model pre-trained on 3D-FRONT plus ASE and fine-tuned on 3D-FRONT. Returns a deterministic GLB point-cloud compatibility preview; canonical Gaussian fidelity remains in the PT and INRIA PLY sidecars.",
+      "input": "none",
+      "output": "mesh",
+      "output_formats": [
+        "glb"
+      ],
+      "sidecar_formats": [
+        "pt",
+        "ply",
+        "gif",
+        "json"
+      ],
+      "pbr": false,
+      "num_samples": 1,
+      "fixed_params": {
+        "num_samples": 1
+      },
+      "weight_owner_id": "generate-both",
+      "download_check": ".modly/https-assets-ready.json",
+      "https_downloads": [
+        {
+          "url": "https://kaldir.vc.cit.tum.de/gaussiangpt/vqvae_both.ckpt",
+          "filename": "vqvae_both.ckpt",
+          "size_bytes": 2115018167,
+          "sha256": "a780ed2920e877736699bb3da84a43362c1a565adff91217841d4b95cb784542"
+        },
+        {
+          "url": "https://kaldir.vc.cit.tum.de/gaussiangpt/gpt_both.ckpt",
+          "filename": "gpt_both.ckpt",
+          "size_bytes": 3421156679,
+          "sha256": "054978e811716292472dd501cc05b54c39789af6dd8730aab86061545c8f0a8b"
+        }
+      ],
+      "params_schema": [
+        {
+          "id": "temperature",
+          "label": "Temperature",
+          "type": "float",
+          "default": 0.9,
+          "min": 0.0,
+          "max": 2.0,
+          "step": 0.05,
+          "tooltip": "Autoregressive sampling temperature. Higher values increase diversity and instability."
+        },
+        {
+          "id": "top_p",
+          "label": "Top P",
+          "type": "float",
+          "default": 0.9,
+          "min": 0.01,
+          "max": 1.0,
+          "step": 0.01,
+          "tooltip": "Nucleus-sampling probability threshold."
+        },
+        {
+          "id": "top_k",
+          "label": "Top K",
+          "type": "int",
+          "default": 0,
+          "min": 0,
+          "step": 1,
+          "tooltip": "Limit sampling to the K most likely tokens. Zero disables top-k filtering."
+        },
+        {
+          "id": "seed",
+          "label": "Seed",
+          "type": "int",
+          "default": 0,
+          "min": 0,
+          "max": 2147483646,
+          "step": 1,
+          "tooltip": "Deterministic sampling seed."
+        },
+        {
+          "id": "background_color",
+          "label": "Preview Background",
+          "type": "select",
+          "default": "white",
+          "options": [
+            {
+              "value": "white",
+              "label": "White"
+            },
+            {
+              "value": "black",
+              "label": "Black"
+            }
+          ],
+          "tooltip": "Background used only for the optional orbit preview."
+        },
+        {
+          "id": "render_preview",
+          "label": "Render Orbit Preview",
+          "type": "select",
+          "default": "true",
+          "options": [
+            {
+              "value": "true",
+              "label": "Render"
+            },
+            {
+              "value": "false",
+              "label": "Skip"
+            }
+          ],
+          "tooltip": "Render an optional Gaussian orbit GIF after sampling. This section is not interruptible until the upstream renderer returns."
+        }
+      ]
+    }
+  ]
+}

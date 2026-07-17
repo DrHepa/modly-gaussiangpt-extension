@@ -1,0 +1,28 @@
+# GaussianGPT upstream runtime requirements at commit
+# 0615470a5ff359c676408e9ae42036d534d04a43.
+#
+# Torch and torchvision are installed by setup.py from the index selected by
+# the actual nvcc/toolkit release. MinkowskiEngine is installed separately at
+# immutable commit 1a17f71f3158b9e94e90703961695de627f3df08.
+#
+# Exact upstream pins:
+lightning==2.5.2
+git+https://github.com/nerfstudio-project/gsplat.git@d23d7ca5dd26c3756967304b621ae88521672ed5
+git+https://github.com/facebookresearch/pytorch3d.git@75ebeeaea0908c5527e7b1e305fbc7681382db47
+#
+# Upstream commit 0615470 does not constrain these versions. They intentionally
+# remain unpinned rather than inventing unsupported compatibility claims.
+ninja
+plyfile
+einops
+tensorboard
+vector-quantize-pytorch
+tqdm
+torchmetrics[image]
+hydra-core
+imageio
+opencv-python
+scikit-image
+iopath
+matplotlib
+lpips

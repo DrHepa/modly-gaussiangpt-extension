@@ -1,0 +1,15 @@
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.modly/
+models/
+outputs/
+*.ckpt
+/build/
+/dist/
+/*.egg-info/
+/.coverage
+/.coverage.*
+/htmlcov/

@@ -1,0 +1,40 @@
+defaults:
+  - default
+
+# model specific hyperparameters
+lr: 1e-4
+weight_decay: 0.0
+
+max_epochs: 500 # deliberate overestimate; stop via checkpoints
+batch_scenes: 1
+
+max_batch_points: null # if set, skip batches where num points > this for memory reasons
+
+precision: bf16-mixed
+
+# Defaults below are for VFront/ASE. PhotoShape uses recon_weight=12.5, vgg_weight=0.1.
+losses:
+  commit_weight: 0.25
+  rerendering:
+    recon_weight: 7.5
+    vgg_weight: 0.3 # perceptual term, similar to lpips
+    lpips_weight: 0.0
+    ssim_weight: 0.0
+    depth_weight: 0.0
+
+# training visual output configuration
+output:
+  render_frequency: 1
+  num_samples_train: 8
+  num_samples_val: 8
+
+# free the CUDA cache periodically; the sparse ops tend to fragment memory
+free_cache:
+  enabled: true # whether to enable regular freeing of cache memory
+  frequency: 1 # frequency in steps to free cache
+
+# only used for tokenization, not training -> where to store the tokenized data
+tokenization:
+  output_dir: null
+  sort_by: "z"
+  generate_augmented_samples: false
